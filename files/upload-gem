@@ -1,0 +1,3 @@
+#!/bin/sh
+
+jruby -S gem nexus --url https://repository.porscheinformatik.com/repository/rubygems-inhouse --credential $1 `find . -type f -name '*.gem'`

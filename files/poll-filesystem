@@ -1,0 +1,36 @@
+#!/bin/sh
+# script that gets a hash of a directory and checks every few seconds if the hash has changed
+# if it has changed, it executes a command
+
+function printhelp {
+	echo Usage: poll-filesystem PATH COMMAND
+}
+
+if [ -d $1 ] || [ -f $1 ]; then
+ f="$1"
+else
+ echo $(date +"%d.%m.%Y %T %:::z") ERROR: $1 is neither a directory nor a file
+ printhelp
+ exit 1
+fi
+
+shift
+
+if [ -z "$*" ]; then
+ echo $(date +"%d.%m.%Y %T %:::z") ERROR: COMMAND is missing
+ printhelp
+ exit 1
+fi
+cmd=$*
+
+readonly getmd5sum="tar -cP $f | md5sum"
+md5val="`eval ${getmd5sum}`"
+
+echo Listening on $f
+while : ; do
+ if [[ $md5val != `eval ${getmd5sum}` ]]; then
+  $cmd
+  md5val="`eval ${getmd5sum}`"
+ fi
+ sleep 2
+done
